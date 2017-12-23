@@ -1,20 +1,55 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+//import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  state = {
+    cards: [] 
+  }
+
+  addNewCard = (cardInfo) => {
+
+    this.setState(
+        prevState => ({
+          cards: prevState.cards.concat(cardInfo)
+        })
+    );
+  };
+
   render() {
     return (
       <div className="App">
-        <CardList cards={Data}/>
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <Form onSubmit={this.addNewCard}/>
+        <CardList cards={this.state.cards} />
       </div>
+    );
+  }
+}
+
+class Form extends React.Component{
+  state = {userName:""}
+  handleSubmit=(event)=>{
+    event.preventDefault();
+    console.log("Event: form submitted", this.state.userName);
+    var call1 = 'https://api.github.com/users/' + this.state.userName;
+    fetch(call1)
+          .then((result) => {return result.json();
+          }).then(
+            (jsonResult) => {
+              console.log(jsonResult);
+              this.props.onSubmit(jsonResult)
+            }
+          );
+  }
+  render(){
+    return(
+      <form onSubmit={this.handleSubmit}>
+        <input type="text" 
+        value={this.state.userName} 
+        onChange = {(event)=>{this.setState({userName: event.target.value})}}
+        placeholder="Github username" required/>
+        <button type="submit">Add user</button>
+      </form>
     );
   }
 }
@@ -31,28 +66,10 @@ const Card = (props) => {
     );
 }
 
-let Data=[
-    {
-      name:'Aalok', 
-      avatar_url:'https://avatars.githubusercontent.com/u/10000',
-      company:'Facebook'
-    },
-    {
-      name:'Avanti', 
-      avatar_url:'https://avatars.githubusercontent.com/u/20000',
-      company:'Facebook'
-    },
-    {
-      name:'Aarohi', 
-      avatar_url:'https://avatars.githubusercontent.com/u/30000',
-      company:'Facebook'
-    },
-];
-
 const CardList = (props) => {
   return(
     <div>
-      {props.cards.map(card => <Card name={card.name} avatar_url={card.avatar_url} company={card.company} />)}
+      {props.cards.map(card => <Card {...card} />)}
     </div>
   );
 }
